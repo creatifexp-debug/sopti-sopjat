@@ -16,10 +16,6 @@ export default function ProductsClient() {
   const [activeCategory, setActiveCategory] = useState<string | null>(categoryParam)
   const [sort, setSort] = useState<string>("")
 
-
-
-  /* ---------------- FETCH PRODUCTS ---------------- */
-
   const fetchProducts = async () => {
 
     let url = "/api/products?"
@@ -40,32 +36,20 @@ export default function ProductsClient() {
       if (Array.isArray(data)) {
         setProducts(data)
       } else {
-        console.error("Products API error:", data)
         setProducts([])
       }
 
-    } catch (error) {
+    } catch {
 
-      console.error("Fetch failed:", error)
       setProducts([])
 
     }
 
   }
 
-
-
-  /* ---------------- FETCH PRODUCTS WHEN FILTER CHANGES ---------------- */
-
   useEffect(() => {
-
     fetchProducts()
-
   }, [activeCategory, sort])
-
-
-
-  /* ---------------- FETCH CATEGORIES ---------------- */
 
   useEffect(() => {
 
@@ -84,10 +68,6 @@ export default function ProductsClient() {
 
   }, [])
 
-
-
-  /* ---------------- SYNC URL ---------------- */
-
   useEffect(() => {
 
     if (activeCategory) {
@@ -102,15 +82,11 @@ export default function ProductsClient() {
 
   }, [activeCategory, router])
 
-
-
   return (
 
     <div className="bg-black text-white min-h-screen px-6 py-24">
 
       <div className="max-w-7xl mx-auto">
-
-        {/* Header */}
 
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
 
@@ -118,33 +94,19 @@ export default function ProductsClient() {
             Products
           </h1>
 
-          {/* Sort */}
-
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
             className="bg-zinc-900 border border-zinc-700 px-4 py-2 rounded-lg text-white"
           >
 
-            <option value="">
-              Sort
-            </option>
-
-            <option value="low">
-              Price: Low → High
-            </option>
-
-            <option value="high">
-              Price: High → Low
-            </option>
+            <option value="">Sort</option>
+            <option value="low">Price: Low → High</option>
+            <option value="high">Price: High → Low</option>
 
           </select>
 
         </div>
-
-
-
-        {/* Category Filters */}
 
         <div className="flex flex-wrap gap-3 mb-10 overflow-x-auto pb-2">
 
@@ -158,7 +120,6 @@ export default function ProductsClient() {
           >
             All
           </button>
-
 
           {categories.map((cat: any) => {
 
@@ -184,13 +145,9 @@ export default function ProductsClient() {
 
         </div>
 
-
-
-        {/* Products Grid */}
-
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
 
-          {Array.isArray(products) && products.map((product) => (
+          {products.map((product) => (
 
             <ProductCard
               key={product.id}
@@ -201,16 +158,10 @@ export default function ProductsClient() {
 
         </div>
 
-
-
-        {/* Empty State */}
-
         {products.length === 0 && (
 
           <div className="text-center text-gray-500 mt-20">
-
             No products found
-
           </div>
 
         )}
