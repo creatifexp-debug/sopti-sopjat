@@ -1,35 +1,34 @@
-import Navbar from "./homepage/Navbar"
+import Banner from "./homepage/Banner"
+import Header from "./homepage/Header"
 import Hero from "./homepage/Hero"
-import NewDrops from "./homepage/NewDrops"
 import Categories from "./homepage/Categories"
-import BrandStory from "./homepage/BrandStory"
-import ClearanceSale from "./homepage/ClearanceSale"
+import About from "./homepage/About"
 import Footer from "./homepage/Footer"
+import NewDrops from "./homepage/NewDrops"
 
-export default function Home(){
 
-return(
+export default function Home() {
 
-<main className="bg-black text-white">
+  return (
 
-<Navbar/>
+    <main>
 
-<div className="pt-16"/>
+      <Banner />
+      
+      <Header />
 
-<Hero/>
+      <Hero />
 
-<NewDrops/>
+      <Categories />
 
-<Categories/>
+      <NewDrops />
 
-<BrandStory/>
+      <About />
 
-<ClearanceSale/>
+      <Footer />
 
-<Footer/>
+    </main>
 
-</main>
-
-)
+  )
 
 }

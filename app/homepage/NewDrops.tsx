@@ -1,73 +1,153 @@
 "use client"
 
-import { useEffect,useState } from "react"
+import { useEffect, useState } from "react"
+import Image from "next/image"
 
-export default function NewDrops(){
+type Product = {
+  id: string
+  name: string
+  sp: number
+  image_url?: string
+}
 
-const [products,setProducts] = useState<any[]>([])
+export default function NewDrops() {
 
-useEffect(()=>{
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
 
-fetch("/api/products")
-.then(res=>res.json())
-.then(data=>setProducts(data))
+  useEffect(() => {
 
-},[])
+    const fetchProducts = async () => {
 
-return(
+      try {
 
-<section className="py-20 px-6">
+        const res = await fetch("/api/products")
+        const data = await res.json()
 
-<div className="max-w-7xl mx-auto">
+        if (Array.isArray(data)) {
+          setProducts(data.slice(0,10))
+        }
 
-<h2 className="text-4xl font-bold mb-12 text-center">
-New Drops
-</h2>
+      } catch (err) {
 
-<div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        console.error(err)
 
-{products.map((product)=>(
+      } finally {
 
-<div
-key={product.id}
-className="bg-black rounded-xl overflow-hidden border border-gray-800"
->
+        setLoading(false)
 
-<img
-src={product.image_url || "https://placehold.co/600x600"}
-className="w-full h-60 object-cover"
-/>
+      }
 
-<div className="p-4">
+    }
 
-<h3 className="text-white">
-{product.name}
-</h3>
+    fetchProducts()
 
-<div className="flex justify-between mt-3">
+  }, [])
 
-<span className="text-cyan-400 font-bold">
-₹{product.sp}
-</span>
 
-<button className="text-white">
-+
-</button>
 
-</div>
+  return (
 
-</div>
+    <section className="py-28 px-6 bg-[#fafafa]">
 
-</div>
+      <div className="max-w-7xl mx-auto">
 
-))}
+        {/* Header */}
 
-</div>
+        <div className="text-center mb-16">
 
-</div>
+          <h2 className="text-4xl lg:text-5xl font-semibold text-zinc-900">
+            New Drops
+          </h2>
 
-</section>
+          <p className="text-zinc-500 mt-4">
+            Discover the newest additions to the collection
+          </p>
 
-)
+        </div>
+
+
+
+        {/* Grid */}
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+
+          {loading &&
+
+            Array.from({ length: 10 }).map((_, i) => (
+
+              <div
+                key={i}
+                className="aspect-[3/4] bg-white rounded-2xl animate-pulse border border-zinc-100"
+              />
+
+            ))
+
+          }
+
+
+
+          {!loading && products.map((product) => (
+
+            <div
+              key={product.id}
+              className="group bg-white rounded-2xl overflow-hidden border border-zinc-200 hover:shadow-lg transition duration-300"
+            >
+
+              {/* Image */}
+
+              <div className="relative h-64 overflow-hidden bg-zinc-100">
+
+                <Image
+                  src={product.image_url || "/placeholder.png"}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width:768px) 50vw, (max-width:1200px) 33vw, 20vw"
+                  className="object-cover group-hover:scale-105 transition duration-500"
+                />
+
+              </div>
+
+
+
+              {/* Content */}
+
+              <div className="p-5">
+
+                <h3 className="text-zinc-900 font-medium text-sm lg:text-base line-clamp-2">
+                  {product.name}
+                </h3>
+
+
+
+                <div className="flex items-center justify-between mt-4">
+
+                  <span className="text-lg font-semibold text-zinc-900">
+                    ₹{product.sp}
+                  </span>
+
+
+
+                  <button className="w-9 h-9 flex items-center justify-center rounded-full border border-zinc-300 text-zinc-700 hover:bg-black hover:text-white transition">
+
+                    +
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      </div>
+
+    </section>
+
+  )
 
 }

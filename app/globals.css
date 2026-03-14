@@ -2,29 +2,11 @@
 
 /* ================= THEME COLORS ================= */
 
-@theme {
-  --color-neon-cyan: #00f5ff;
-  --color-neon-magenta: #ff00ff;
-  --color-neon-purple: #bf00ff;
-  --color-dark-bg: #0a0a0f;
-  --color-dark-card: #12121a;
-  --color-dark-surface: #1a1a25;
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
-/* ================= GLOBAL STYLES ================= */
-
-html, body {
-  background: var(--color-dark-bg);
-}
-
-/* ================= NEON TEXT UTILITY ================= */
-
-.neon-text {
-  background: linear-gradient(
-    90deg,
-    var(--color-neon-cyan),
-    var(--color-neon-purple)
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.animate-marquee {
+  animation: marquee 20s linear infinite;
 }
