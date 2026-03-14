@@ -1,8 +1,6 @@
-// app/products/page.tsx
+"use client"
 
 export const dynamic = "force-dynamic"
-
-"use client"
 
 import { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
@@ -96,9 +94,7 @@ export default function ProductsPage() {
 
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
 
-          <h1 className="text-4xl font-bold">
-            Products
-          </h1>
+          <h1 className="text-4xl font-bold">Products</h1>
 
           <select
             value={sort}
@@ -153,7 +149,7 @@ export default function ProductsPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
 
-          {Array.isArray(products) && products.map((product) => (
+          {products.map((product) => (
 
             <ProductCard
               key={product.id}
