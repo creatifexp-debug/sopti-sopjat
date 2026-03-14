@@ -1,4 +1,3 @@
-//app\admin\add-product\page.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -13,7 +12,10 @@ export default function AddProduct() {
   const [sp,setSp] = useState("")
   const [stock,setStock] = useState("")
 
-  const [images,setImages] = useState<File[]>([])
+  const [mainImage,setMainImage] = useState<File | null>(null)
+  const [gallery,setGallery] = useState<File[]>([])
+
+  const [loading,setLoading] = useState(false)
 
   const [categories,setCategories] = useState<any[]>([])
   const [subCategories,setSubCategories] = useState<any[]>([])
@@ -31,48 +33,47 @@ export default function AddProduct() {
     loadMaterials()
   },[])
 
-
   const loadCategories = async ()=>{
-
-    const { data } = await supabase
-      .from("categories")
-      .select("*")
-
+    const { data } = await supabase.from("categories").select("*")
     if(data) setCategories(data)
-
   }
 
-
   const loadSubCategories = async(categoryId:string)=>{
-
     const { data } = await supabase
       .from("sub_categories")
       .select("*")
       .eq("category_id",categoryId)
 
     if(data) setSubCategories(data)
-
   }
-
 
   const loadSizes = async ()=>{
-
-    const { data } = await supabase
-      .from("sizes")
-      .select("*")
-
+    const { data } = await supabase.from("sizes").select("*")
     if(data) setSizes(data)
+  }
 
+  const loadMaterials = async ()=>{
+    const { data } = await supabase.from("materials").select("*")
+    if(data) setMaterials(data)
   }
 
 
-  const loadMaterials = async ()=>{
 
-    const { data } = await supabase
-      .from("materials")
-      .select("*")
+  const uploadImage = async(productId:string,file:File)=>{
 
-    if(data) setMaterials(data)
+    const filePath = `${productId}/${Date.now()}-${file.name}`
+
+    const { error } = await supabase.storage
+      .from("product-images")
+      .upload(filePath,file)
+
+    if(error) throw error
+
+    const { data } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(filePath)
+
+    return data.publicUrl
 
   }
 
@@ -80,18 +81,20 @@ export default function AddProduct() {
 
   const addProduct = async ()=>{
 
+    setLoading(true)
+
     try{
 
-      const { data:product, error } = await supabase
+      const { data:product,error } = await supabase
         .from("products")
         .insert([{
-          name:name,
-          description:description,
+          name,
+          description,
           category_id:selectedCategory,
           sub_category_id:selectedSubCategory,
           size_id:selectedSize,
           material_id:selectedMaterial,
-          color:color,
+          color,
           cp:Number(cp),
           sp:Number(sp),
           stock:Number(stock)
@@ -100,41 +103,35 @@ export default function AddProduct() {
         .single()
 
       if(error){
-        console.error(error)
         alert("Error creating product")
+        console.error(error)
         return
       }
 
       const productId = product.id
 
-      let mainImage = null
+      let mainImageUrl = null
 
-      if(images.length){
+      if(mainImage){
+        mainImageUrl = await uploadImage(productId,mainImage)
+      }
+
+      if(mainImageUrl){
+
+        await supabase
+          .from("products")
+          .update({ image_url:mainImageUrl })
+          .eq("id",productId)
+
+      }
+
+      if(gallery.length){
 
         const galleryRows:any[] = []
 
-        for(let i=0;i<images.length;i++){
+        for(let i=0;i<gallery.length;i++){
 
-          const file = images[i]
-
-          const filePath = `${productId}/${Date.now()}-${file.name}`
-
-          const { error:uploadError } = await supabase.storage
-            .from("product-images")
-            .upload(filePath,file)
-
-          if(uploadError){
-            console.error(uploadError)
-            continue
-          }
-
-          const { data } = supabase.storage
-            .from("product-images")
-            .getPublicUrl(filePath)
-
-          const url = data.publicUrl
-
-          if(i===0) mainImage = url
+          const url = await uploadImage(productId,gallery[i])
 
           galleryRows.push({
             product_id:productId,
@@ -144,30 +141,21 @@ export default function AddProduct() {
 
         }
 
-        if(galleryRows.length){
-
-          await supabase
-            .from("product_images")
-            .insert(galleryRows)
-
-        }
-
-      }
-
-      if(mainImage){
-
         await supabase
-          .from("products")
-          .update({ image_url:mainImage })
-          .eq("id",productId)
+          .from("product_images")
+          .insert(galleryRows)
 
       }
 
-      alert("Product Created")
+      alert("Product Created Successfully")
 
     }catch(err){
+
       console.error(err)
+
     }
+
+    setLoading(false)
 
   }
 
@@ -175,136 +163,156 @@ export default function AddProduct() {
 
   return(
 
-    <div className="max-w-2xl text-black">
+    <div className="max-w-4xl mx-auto p-8">
 
-      <h1 className="text-3xl font-bold mb-6">
+      <h1 className="text-3xl font-semibold mb-8">
         Add Product
       </h1>
 
-      <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <input
           placeholder="Product Name"
-          className="border p-2"
+          className="border rounded-lg p-3"
           onChange={(e)=>setName(e.target.value)}
         />
 
-        <textarea
-          placeholder="Description"
-          className="border p-2"
-          onChange={(e)=>setDescription(e.target.value)}
-        />
-
-        <select
-          className="border p-2"
-          onChange={(e)=>{
-            setSelectedCategory(e.target.value)
-            loadSubCategories(e.target.value)
-          }}
-        >
-
-          <option>Select Category</option>
-
-          {categories.map((c)=>(
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-
-        </select>
-
-
-        <select
-          className="border p-2"
-          onChange={(e)=>setSelectedSubCategory(e.target.value)}
-        >
-
-          <option>Select Sub Category</option>
-
-          {subCategories.map((sc)=>(
-            <option key={sc.id} value={sc.id}>
-              {sc.name}
-            </option>
-          ))}
-
-        </select>
-
-
-        <select
-          className="border p-2"
-          onChange={(e)=>setSelectedSize(e.target.value)}
-        >
-
-          <option>Select Size</option>
-
-          {sizes.map((s)=>(
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-
-        </select>
-
-
-        <select
-          className="border p-2"
-          onChange={(e)=>setSelectedMaterial(e.target.value)}
-        >
-
-          <option>Select Material</option>
-
-          {materials.map((m)=>(
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-
-        </select>
-
-
         <input
           placeholder="Color"
-          className="border p-2"
+          className="border rounded-lg p-3"
           onChange={(e)=>setColor(e.target.value)}
         />
 
         <input
           placeholder="Cost Price"
-          className="border p-2"
+          className="border rounded-lg p-3"
           onChange={(e)=>setCp(e.target.value)}
         />
 
         <input
           placeholder="Selling Price"
-          className="border p-2"
+          className="border rounded-lg p-3"
           onChange={(e)=>setSp(e.target.value)}
         />
 
         <input
           placeholder="Stock"
-          className="border p-2"
+          className="border rounded-lg p-3"
           onChange={(e)=>setStock(e.target.value)}
         />
 
+      </div>
+
+
+      <textarea
+        placeholder="Product Description"
+        className="border rounded-lg p-3 w-full mt-6"
+        onChange={(e)=>setDescription(e.target.value)}
+      />
+
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+
+        <select
+          className="border rounded-lg p-3"
+          onChange={(e)=>{
+            setSelectedCategory(e.target.value)
+            loadSubCategories(e.target.value)
+          }}
+        >
+          <option>Select Category</option>
+          {categories.map((c)=>(
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+
+
+        <select
+          className="border rounded-lg p-3"
+          onChange={(e)=>setSelectedSubCategory(e.target.value)}
+        >
+          <option>Select Sub Category</option>
+          {subCategories.map((sc)=>(
+            <option key={sc.id} value={sc.id}>{sc.name}</option>
+          ))}
+        </select>
+
+
+        <select
+          className="border rounded-lg p-3"
+          onChange={(e)=>setSelectedSize(e.target.value)}
+        >
+          <option>Select Size</option>
+          {sizes.map((s)=>(
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </select>
+
+
+        <select
+          className="border rounded-lg p-3"
+          onChange={(e)=>setSelectedMaterial(e.target.value)}
+        >
+          <option>Select Material</option>
+          {materials.map((m)=>(
+            <option key={m.id} value={m.id}>{m.name}</option>
+          ))}
+        </select>
+
+      </div>
+
+
+
+      <div className="mt-8">
+
+        <label className="block font-medium mb-2">
+          Main Image
+        </label>
+
         <input
           type="file"
-          multiple
-          accept="image/png,image/jpeg,image/webp"
+          accept="image/*"
           onChange={(e)=>{
             if(e.target.files){
-              setImages(Array.from(e.target.files))
+              setMainImage(e.target.files[0])
             }
           }}
         />
 
-        <button
-          onClick={addProduct}
-          className="bg-black text-white p-3"
-        >
-          Save Product
-        </button>
+      </div>
+
+
+
+      <div className="mt-6">
+
+        <label className="block font-medium mb-2">
+          Gallery Images
+        </label>
+
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={(e)=>{
+            if(e.target.files){
+              setGallery(Array.from(e.target.files))
+            }
+          }}
+        />
 
       </div>
+
+
+
+      <button
+        onClick={addProduct}
+        disabled={loading}
+        className="mt-10 bg-black text-white px-6 py-3 rounded-lg"
+      >
+
+        {loading ? "Saving..." : "Save Product"}
+
+      </button>
 
     </div>
 

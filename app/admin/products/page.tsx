@@ -1,55 +1,59 @@
+//app\admin\products\page.tsx
 "use client"
 
 import { useEffect, useState } from "react"
 import { supabase } from "../../lib/supabase"
 import Link from "next/link"
 
+type Product = {
+  id: string
+  name: string
+  sp: number
+  stock: number
+  image_url?: string
+  category?: string
+  sub_category?: string
+}
+
 export default function ProductsPage(){
 
-const [products,setProducts] = useState<any[]>([])
-const [categories,setCategories] = useState<any[]>([])
-const [selectedCategory,setSelectedCategory] = useState("")
+const [products,setProducts] = useState<Product[]>([])
+const [loading,setLoading] = useState(true)
+const [search,setSearch] = useState("")
 
 useEffect(()=>{
 fetchProducts()
-fetchCategories()
 },[])
 
 
+/* ---------------- FETCH PRODUCTS ---------------- */
+
 const fetchProducts = async()=>{
 
-const {data,error} = await supabase
-.from("products")
-.select(`
-id,
-name,
-sp,
-stock,
-image_url,
-category_id,
-categories(name),
-sub_categories(name)
-`)
-
-console.log(data,error)
-
-if(data) setProducts(data)
-
-}
-
-
-const fetchCategories = async()=>{
+setLoading(true)
 
 const {data,error} = await supabase
-.from("categories")
+.from("products_view")
 .select("*")
+.order("id",{ascending:false})
 
-console.log(data,error)
+console.log("Supabase data:",data)
 
-if(data) setCategories(data)
+if(error){
+console.error("Error fetching products:",error.message)
+}
+
+if(data){
+setProducts(data)
+}
+
+setLoading(false)
 
 }
 
+
+
+/* ---------------- DELETE PRODUCT ---------------- */
 
 const deleteProduct = async(id:string)=>{
 
@@ -62,86 +66,134 @@ const {error} = await supabase
 .delete()
 .eq("id",id)
 
-console.log(error)
+if(error){
 
-if(!error){
-alert("Product deleted")
-fetchProducts()
+alert("Error deleting product")
+console.error(error)
+
+return
+
 }
 
+setProducts(products.filter(p=>p.id!==id))
+
 }
+
+
+
+/* ---------------- SEARCH FILTER ---------------- */
+
+const filteredProducts = products.filter((p)=>{
+
+if(!search) return true
+
+return p.name.toLowerCase().includes(search.toLowerCase())
+
+})
+
 
 
 return(
 
-<div>
+<div className="max-w-7xl mx-auto px-6 py-10 text-black">
 
-<h1 className="text-3xl font-bold mb-6 text-black">
+
+{/* HEADER */}
+
+<div className="flex items-center justify-between mb-8">
+
+<h1 className="text-3xl font-semibold">
 Products
 </h1>
 
-
-{/* CATEGORY FILTER */}
-
-<select
-className="border p-2 mb-6 text-black"
-onChange={(e)=>setSelectedCategory(e.target.value)}
+<Link
+href="/admin/add-product"
+className="bg-black text-white px-5 py-2 rounded-lg"
 >
++ Add Product
+</Link>
 
-<option value="">All Categories</option>
+</div>
 
-{categories.map((c)=>(
-<option key={c.id} value={c.id}>
-{c.name}
-</option>
+
+
+{/* SEARCH */}
+
+<input
+placeholder="Search products..."
+className="border rounded-lg px-4 py-2 w-full md:w-80 mb-10"
+onChange={(e)=>setSearch(e.target.value)}
+/>
+
+
+
+{/* LOADING */}
+
+{loading && (
+
+<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+
+{Array.from({length:10}).map((_,i)=>(
+
+<div
+key={i}
+className="h-64 bg-gray-200 rounded-xl animate-pulse"
+/>
+
 ))}
 
-</select>
+</div>
+
+)}
 
 
 
 {/* PRODUCTS GRID */}
 
-<div className="grid grid-cols-4 gap-6">
+{!loading && (
 
-{products
-.filter((p)=>
-selectedCategory
-? p.category_id === selectedCategory
-: true
-)
-.map((p)=>(
+<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+
+{filteredProducts.map((p)=>(
 
 <div
 key={p.id}
-className="border rounded-lg bg-white shadow p-4 text-black"
+className="border rounded-xl bg-white shadow-sm hover:shadow-md transition overflow-hidden"
 >
 
 <img
-src={p.image_url}
-className="w-full h-40 object-cover mb-3"
+src={p.image_url || "https://placehold.co/600x600"}
+className="w-full h-40 object-cover"
 />
 
-<h2 className="font-semibold">
+
+<div className="p-4">
+
+<h2 className="font-medium text-sm line-clamp-2">
 {p.name}
 </h2>
 
-<p className="text-sm text-gray-600">
-{p.categories?.name} / {p.sub_categories?.name}
+
+<p className="text-xs text-gray-500 mt-1">
+{p.category} / {p.sub_category}
 </p>
 
-<p className="mt-2 font-bold">
+
+<p className="mt-2 font-semibold">
 ₹{p.sp}
 </p>
 
-<p className="text-sm">
+
+<p className="text-xs text-gray-500">
 Stock: {p.stock}
 </p>
 
 
+<div className="flex gap-2 mt-3">
+
 <Link
 href={`/admin/products/edit/${p.id}`}
-className="block mt-3 bg-black text-white text-center py-1 rounded"
+className="flex-1 bg-black text-white text-xs py-1 rounded text-center"
 >
 Edit
 </Link>
@@ -149,16 +201,34 @@ Edit
 
 <button
 onClick={()=>deleteProduct(p.id)}
-className="mt-3 bg-red-500 text-white px-3 py-1 rounded"
+className="flex-1 bg-red-500 text-white text-xs py-1 rounded"
 >
 Delete
 </button>
 
 </div>
 
-))}
+</div>
 
 </div>
+
+))}
+
+
+
+{filteredProducts.length===0 && (
+
+<div className="col-span-full text-center py-20 text-gray-500">
+
+No products found
+
+</div>
+
+)}
+
+</div>
+
+)}
 
 </div>
 
