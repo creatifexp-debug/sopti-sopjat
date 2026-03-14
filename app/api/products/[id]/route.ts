@@ -1,36 +1,37 @@
-import { NextResponse } from "next/server"
+// app/api/products/[id]/route.ts
+
+import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
-process.env.NEXT_PUBLIC_SUPABASE_URL!,
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
 export async function GET(
-request:Request,
-{ params }: { params: { id:string } }
-){
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
 
-const { data,error } = await supabase
-.from("products")
-.select(`
-id,
-name,
-description,
-sp,
-image_url,
-categories(name),
-product_images(image_url)
-`)
-.eq("id",params.id)
-.single()
+  const { id } = await context.params
 
-if(error){
+  const { data, error } = await supabase
+    .from("products")
+    .select(`
+      id,
+      name,
+      description,
+      sp,
+      image_url,
+      categories(name),
+      product_images(image_url)
+    `)
+    .eq("id", id)
+    .single()
 
-return NextResponse.json({error:error.message},{status:500})
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
 
-}
-
-return NextResponse.json(data)
-
+  return NextResponse.json(data)
 }
