@@ -11,7 +11,8 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url)
 
-  const category = searchParams.get("category")
+  const category_id = searchParams.get("category_id")
+  const exclude_id = searchParams.get("exclude_id")
   const sort = searchParams.get("sort")
 
   try {
@@ -23,17 +24,21 @@ export async function GET(request: Request) {
         name,
         sp,
         image_url,
+        category_id,
         categories:categories!products_category_id_fkey(name)
       `)
 
-    /* CATEGORY FILTER */
-
-    if (category) {
-      query = query.eq("categories.name", category)
+    /* ✅ CATEGORY FILTER (CORRECT WAY) */
+    if (category_id) {
+      query = query.eq("category_id", category_id)
     }
 
-    /* SORTING */
+    /* ✅ EXCLUDE CURRENT PRODUCT */
+    if (exclude_id) {
+      query = query.neq("id", exclude_id)
+    }
 
+    /* ✅ SORTING */
     if (sort === "low") {
       query = query.order("sp", { ascending: true })
     }
@@ -41,6 +46,9 @@ export async function GET(request: Request) {
     if (sort === "high") {
       query = query.order("sp", { ascending: false })
     }
+
+    /* ✅ LIMIT */
+    query = query.limit(10)
 
     const { data, error } = await query
 
@@ -54,9 +62,7 @@ export async function GET(request: Request) {
   } catch (err) {
 
     console.error("Server error:", err)
-
     return NextResponse.json([], { status: 200 })
 
   }
-
 }

@@ -23,13 +23,15 @@ export async function GET(
       description,
       sp,
       image_url,
-      categories(name),
+      category_id,
+      categories:categories!products_category_id_fkey(name),
       product_images(image_url)
     `)
     .eq("id", id)
     .single()
 
   if (error) {
+    console.error(error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 

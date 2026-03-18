@@ -10,3 +10,10 @@
 .animate-marquee {
   animation: marquee 20s linear infinite;
 }
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
