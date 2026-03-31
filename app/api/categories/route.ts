@@ -11,7 +11,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("categories")
-    .select("id, name")
+    .select("id, name, image_url") // ✅ include image
     .order("name")
 
   if (error) {

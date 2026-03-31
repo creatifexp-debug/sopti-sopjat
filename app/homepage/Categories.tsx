@@ -8,6 +8,7 @@ import Image from "next/image"
 type Category = {
   id: string
   name: string
+  image_url?: string
 }
 
 export default function Categories() {
@@ -37,18 +38,6 @@ export default function Categories() {
     fetchCategories()
 
   }, [])
-
-
-  const categoryImages: Record<string, string> = {
-
-    Caps: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=800",
-    Hoodies: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800",
-    "T-Shirts": "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800",
-    Jackets: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800",
-    Shorts: "https://images.unsplash.com/photo-1516826957135-700dedea698c?w=800",
-    Accessories: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800",
-
-  }
 
   if (loading) {
     return (
@@ -86,14 +75,13 @@ export default function Categories() {
           {categories.map((cat) => {
 
             const image =
-              categoryImages[cat.name] ||
-              "https://placehold.co/600x600"
+              cat.image_url || "https://placehold.co/600x600"
 
             return (
 
               <Link
                 key={cat.id}
-                href={`/products?category_id=${cat.id}`}  // ✅ FIXED HERE
+                href={`/products?category_id=${cat.id}`}
                 className="group relative rounded-2xl overflow-hidden border border-zinc-800 hover:border-cyan-400 transition duration-300"
               >
 

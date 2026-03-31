@@ -11,7 +11,7 @@ export default function About() {
         <div className="relative h-[420px] rounded-2xl overflow-hidden">
 
           <img
-            src="https://images.unsplash.com/photo-1520975954732-35dd22a6c7df?w=1200"
+            src="https://bdqrqumyubnyqtafzpcr.supabase.co/storage/v1/object/public/assets/file_0000000017f87208acc9d07d1226b6b4.png"
             className="w-full h-full object-cover"
           />
 
@@ -38,9 +38,10 @@ export default function About() {
 
           <p className="text-gray-400 mt-4 leading-relaxed">
 
-            Inspired by street culture and rooted in heritage, every piece
-            we design carries meaning. From everyday essentials to bold
-            statement pieces, our goal is simple — help you wear your identity.
+          Sopti SOPJAT is a Shillong-based apparel store offering both online and offline shopping experiences.
+          Our website showcases our latest collections, making it easy for customers to explore our range.
+          For a more personalized experience, customers can connect directly with our team via WhatsApp to place orders.
+          We offer shipping across India.
 
           </p>
 
