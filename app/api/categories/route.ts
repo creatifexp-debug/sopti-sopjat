@@ -3,21 +3,20 @@ import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
-process.env.NEXT_PUBLIC_SUPABASE_URL!,
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export async function GET(){
+export async function GET() {
 
-const { data, error } = await supabase
-.from("categories")
-.select("name")
-.order("name")
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, name")
+    .order("name")
 
-if(error){
-return NextResponse.json({error:error.message},{status:500})
-}
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
 
-return NextResponse.json(data)
-
+  return NextResponse.json(data ?? [])
 }

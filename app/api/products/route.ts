@@ -12,7 +12,6 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
 
   const category_id = searchParams.get("category_id")
-  const exclude_id = searchParams.get("exclude_id")
   const sort = searchParams.get("sort")
 
   try {
@@ -25,20 +24,16 @@ export async function GET(request: Request) {
         sp,
         image_url,
         category_id,
-        categories:categories!products_category_id_fkey(name)
+        categories(name)
       `)
+      .eq("active", true)
 
-    /* ✅ CATEGORY FILTER (CORRECT WAY) */
+    /* ✅ UUID SAFE FILTER */
     if (category_id) {
       query = query.eq("category_id", category_id)
     }
 
-    /* ✅ EXCLUDE CURRENT PRODUCT */
-    if (exclude_id) {
-      query = query.neq("id", exclude_id)
-    }
-
-    /* ✅ SORTING */
+    /* ✅ SORT */
     if (sort === "low") {
       query = query.order("sp", { ascending: true })
     }
@@ -47,13 +42,10 @@ export async function GET(request: Request) {
       query = query.order("sp", { ascending: false })
     }
 
-    /* ✅ LIMIT */
-    query = query.limit(10)
-
-    const { data, error } = await query
+    const { data, error } = await query.limit(50)
 
     if (error) {
-      console.error("Supabase error:", error)
+      console.error(error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -61,7 +53,7 @@ export async function GET(request: Request) {
 
   } catch (err) {
 
-    console.error("Server error:", err)
+    console.error(err)
     return NextResponse.json([], { status: 200 })
 
   }

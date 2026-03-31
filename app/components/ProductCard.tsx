@@ -1,39 +1,42 @@
 "use client"
 
-import Link from "next/link"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
 
-export default function ProductCard({product}:any){
+export default function ProductCard({ product }: any) {
 
-return(
+  const router = useRouter()
 
-<Link
-href={`/products/${product.id}`}
-className="group block bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 hover:border-cyan-400 transition duration-300"
->
+  return (
 
-<div className="aspect-square overflow-hidden">
+    <div
+      onClick={() => router.push(`/products/${product.id}`)}
+      className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition cursor-pointer overflow-hidden"
+    >
 
-<img
-src={product.image_url || "https://placehold.co/600x600"}
-className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
-/>
+      <div className="relative w-full h-48 bg-gray-100 overflow-hidden">
 
-</div>
+        <Image
+          src={product.image_url}
+          alt={product.name}
+          fill
+          className="object-cover group-hover:scale-105 transition duration-300"
+        />
 
-<div className="p-4">
+      </div>
 
-<h3 className="text-white text-sm font-medium truncate">
-{product.name}
-</h3>
+      <div className="p-4">
 
-<p className="text-cyan-400 font-bold mt-2">
-₹{product.sp}
-</p>
+        <h3 className="text-sm font-medium text-gray-800 line-clamp-2">
+          {product.name}
+        </h3>
 
-</div>
+        <p className="text-lg font-semibold text-black mt-2">
+          ₹{product.sp}
+        </p>
 
-</Link>
+      </div>
 
-)
-
+    </div>
+  )
 }
