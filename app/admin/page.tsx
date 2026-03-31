@@ -15,7 +15,7 @@ export default function AdminDashboard(){
    const { data } = await supabase.auth.getUser()
 
    if(!data.user){
-    router.push("/admin/login")
+    router.push("/login")
    }
 
   }
