@@ -1,24 +1,53 @@
+"use client"
+
+import Image from "next/image"
+
 export default function Hero() {
+
+  const images = [
+    "https://bdqrqumyubnyqtafzpcr.supabase.co/storage/v1/object/public/assets/file_00000000b028720bb53fb1af3b0b3d0b.png",
+    "https://bdqrqumyubnyqtafzpcr.supabase.co/storage/v1/object/public/assets/file_000000000e7472089d221d9e6f802c10.png",
+    "https://bdqrqumyubnyqtafzpcr.supabase.co/storage/v1/object/public/assets/file_0000000027c871fa8239f47ebbd1a362.png",
+    "https://bdqrqumyubnyqtafzpcr.supabase.co/storage/v1/object/public/assets/file_00000000b028720bb53fb1af3b0b3d0b.png",
+    "https://bdqrqumyubnyqtafzpcr.supabase.co/storage/v1/object/public/assets/file_000000000e7472089d221d9e6f802c10.png",
+    "https://bdqrqumyubnyqtafzpcr.supabase.co/storage/v1/object/public/assets/file_0000000027c871fa8239f47ebbd1a362.png",
+  ]
+
   return (
-    <section className="bg-gray-50 py-28 text-center">
 
-      <p className="text-xs tracking-[6px] uppercase text-gray-400">
-        Streetwear Collection
-      </p>
+    <section className="py-6 bg-white">
 
-      <h2 className="text-6xl font-bold mt-4 leading-tight">
-        WEAR YOUR
-        <br />
-        IDENTITY
-      </h2>
+      <div className="flex gap-4 overflow-x-auto px-4 snap-x snap-mandatory no-scrollbar">
 
-      <p className="text-gray-500 mt-6 max-w-md mx-auto">
-        Discover streetwear inspired by culture.
-      </p>
+        {images.map((img, index) => (
 
-      <button className="bg-black text-white px-8 py-3 mt-8 text-sm uppercase hover:bg-gray-800">
-        Shop Now
-      </button>
+          <div
+            key={index}
+            className="
+              snap-center 
+              min-w-[70%] sm:min-w-[45%] lg:min-w-[28%] xl:min-w-[22%]
+              aspect-[3/4] 
+              relative 
+              rounded-xl 
+              overflow-hidden 
+              bg-gray-100
+              group
+            "
+          >
+
+            <Image
+              src={img}
+              alt={`poster-${index}`}
+              fill
+              className="object-cover group-hover:scale-105 transition duration-500"
+              priority={index === 0}
+            />
+
+          </div>
+
+        ))}
+
+      </div>
 
     </section>
   )

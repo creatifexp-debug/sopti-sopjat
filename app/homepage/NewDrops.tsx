@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 
 type Product = {
   id: string
@@ -25,7 +26,7 @@ export default function NewDrops() {
         const data = await res.json()
 
         if (Array.isArray(data)) {
-          setProducts(data.slice(0,10))
+          setProducts(data.slice(0, 10))
         }
 
       } catch (err) {
@@ -44,16 +45,13 @@ export default function NewDrops() {
 
   }, [])
 
-
-
   return (
 
     <section className="py-28 px-6 bg-[#fafafa]">
 
       <div className="max-w-7xl mx-auto">
 
-        {/* Header */}
-
+        {/* HEADER */}
         <div className="text-center mb-16">
 
           <h2 className="text-4xl lg:text-5xl font-semibold text-zinc-900">
@@ -66,36 +64,27 @@ export default function NewDrops() {
 
         </div>
 
-
-
-        {/* Grid */}
-
+        {/* GRID */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
 
           {loading &&
-
             Array.from({ length: 10 }).map((_, i) => (
-
               <div
                 key={i}
                 className="aspect-[3/4] bg-white rounded-2xl animate-pulse border border-zinc-100"
               />
-
             ))
-
           }
-
-
 
           {!loading && products.map((product) => (
 
-            <div
+            <Link
               key={product.id}
-              className="group bg-white rounded-2xl overflow-hidden border border-zinc-200 hover:shadow-lg transition duration-300"
+              href={`/products/${product.id}`} // ✅ FIXED
+              className="group bg-white rounded-2xl overflow-hidden border border-zinc-200 hover:shadow-lg transition duration-300 block"
             >
 
-              {/* Image */}
-
+              {/* IMAGE */}
               <div className="relative h-64 overflow-hidden bg-zinc-100">
 
                 <Image
@@ -108,17 +97,12 @@ export default function NewDrops() {
 
               </div>
 
-
-
-              {/* Content */}
-
+              {/* CONTENT */}
               <div className="p-5">
 
                 <h3 className="text-zinc-900 font-medium text-sm lg:text-base line-clamp-2">
                   {product.name}
                 </h3>
-
-
 
                 <div className="flex items-center justify-between mt-4">
 
@@ -126,19 +110,15 @@ export default function NewDrops() {
                     ₹{product.sp}
                   </span>
 
-
-
-                  <button className="w-9 h-9 flex items-center justify-center rounded-full border border-zinc-300 text-zinc-700 hover:bg-black hover:text-white transition">
-
-                    +
-
-                  </button>
+                  <div className="w-9 h-9 flex items-center justify-center rounded-full border border-zinc-300 text-zinc-700 group-hover:bg-black group-hover:text-white transition">
+                    →
+                  </div>
 
                 </div>
 
               </div>
 
-            </div>
+            </Link>
 
           ))}
 
@@ -149,5 +129,4 @@ export default function NewDrops() {
     </section>
 
   )
-
 }
